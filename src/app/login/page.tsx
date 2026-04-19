@@ -20,14 +20,45 @@ export default function LoginPage() {
 
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [error, setError] = useState("");
+	const defaultLoginError = "Invalid password or user doesn't exist.";
 
 	const handleLogin = async () => {
-		await authClient.signIn.email({
-			email,
-			password,
-		});
+		setError("");
 
-		router.push("/dashboard");
+		try {
+			const result = await authClient.signIn.email({
+				email,
+				password,
+			});
+
+			if (result?.error) {
+				setError(
+					result.error.message === "Invalid email or password"
+						? defaultLoginError
+						: (result.error.message || defaultLoginError),
+				);
+				return;
+			}
+
+			router.push("/dashboard");
+			router.refresh();
+		} catch (err) {
+			const authError = err as {
+				message?: string;
+				error?: {
+					message?: string;
+					code?: string;
+				};
+			};
+
+			setError(
+				authError.error?.message === "Invalid email or password" ||
+					authError.message === "Invalid email or password"
+					? defaultLoginError
+					: (authError.error?.message || authError.message || defaultLoginError),
+			);
+		}
 	};
 
 	return (
@@ -39,6 +70,12 @@ export default function LoginPage() {
 				</CardHeader>
 
 				<CardContent className="space-y-4">
+					{error && (
+						<div className="rounded-md border border-red-200 bg-red-50 p-3 text-red-600 text-sm">
+							{error}
+						</div>
+					)}
+
 					<div className="space-y-2">
 						<Label>Email</Label>
 						<Input

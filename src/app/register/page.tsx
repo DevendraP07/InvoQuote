@@ -58,7 +58,8 @@ export default function RegisterPage() {
 		if (res.ok) {
 			router.push("/login");
 		} else {
-			setError("Registration failed. Email may already exist.");
+			const data = (await res.json().catch(() => null)) as { message?: string } | null;
+			setError(data?.message || "Registration failed.");
 		}
 	};
 

@@ -4,6 +4,7 @@ import { ChevronsUpDown, LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { authClient } from "@/server/better-auth/client";
 
 import {
 	DropdownMenu,
@@ -34,8 +35,9 @@ export function NavUser({
 	const { isMobile } = useSidebar();
 
 	const handleLogout = async () => {
-		await fetch("/api/auth/sign-out", { method: "POST" });
-		router.push("/");
+		await authClient.signOut();
+		router.replace("/");
+		router.refresh();
 	};
 
 	return (
