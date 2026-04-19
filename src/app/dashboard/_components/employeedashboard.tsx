@@ -21,6 +21,18 @@ type Invoice = {
  userId: string
 }
 
+type ApiListResponse<T> = T[] | { [key: string]: unknown }
+
+const getListFromResponse = <T,>(
+ response: ApiListResponse<T>,
+ key: string
+): T[] => {
+ if (Array.isArray(response)) return response
+
+ const value = response?.[key]
+ return Array.isArray(value) ? (value as T[]) : []
+}
+
 export default function EmployeeDashboard({ userId }: { userId: string }) {
 
  const [clients,setClients] = useState<Client[]>([])
@@ -42,9 +54,9 @@ export default function EmployeeDashboard({ userId }: { userId: string }) {
    const quotationsData = await quotationsRes.json()
    const invoicesData = await invoicesRes.json()
 
-   const safeClients = Array.isArray(clientsData) ? clientsData : []
-   const safeQuotations = Array.isArray(quotationsData) ? quotationsData : []
-   const safeInvoices = Array.isArray(invoicesData) ? invoicesData : []
+    const safeClients = getListFromResponse<Client>(clientsData, "clients")
+    const safeQuotations = getListFromResponse<Quotation>(quotationsData, "quotations")
+    const safeInvoices = getListFromResponse<Invoice>(invoicesData, "invoices")
 
    setClients(safeClients)
    setQuotations(safeQuotations)
@@ -95,7 +107,7 @@ export default function EmployeeDashboard({ userId }: { userId: string }) {
      <CardTitle>My Clients</CardTitle>
     </CardHeader>
     <CardContent>
-     <p className="text-2xl font-bold">{myClients}</p>
+        <p className="font-bold text-2xl">{myClients}</p>
     </CardContent>
    </Card>
 
@@ -104,7 +116,7 @@ export default function EmployeeDashboard({ userId }: { userId: string }) {
      <CardTitle>Quotations Created</CardTitle>
     </CardHeader>
     <CardContent>
-     <p className="text-2xl font-bold">{myQuotations}</p>
+        <p className="font-bold text-2xl">{myQuotations}</p>
     </CardContent>
    </Card>
 
@@ -113,7 +125,7 @@ export default function EmployeeDashboard({ userId }: { userId: string }) {
      <CardTitle>Invoices Generated</CardTitle>
     </CardHeader>
     <CardContent>
-     <p className="text-2xl font-bold">{myInvoices}</p>
+        <p className="font-bold text-2xl">{myInvoices}</p>
     </CardContent>
    </Card>
 
@@ -125,7 +137,7 @@ export default function EmployeeDashboard({ userId }: { userId: string }) {
     <CardContent className="space-y-2">
 
      {recent.length===0 && (
-      <p className="text-sm text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
        No recent activity
       </p>
      )}
